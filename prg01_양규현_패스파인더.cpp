@@ -14,6 +14,8 @@ MCI_OPEN_PARMS openBgm_1;
 MCI_PLAY_PARMS playBgm_1;
 MCI_OPEN_PARMS openBgm_2;
 MCI_PLAY_PARMS playBgm_2;
+MCI_OPEN_PARMS openBgm_3;
+MCI_PLAY_PARMS playBgm_3;
 MCI_OPEN_PARMS openbeepSound;
 MCI_PLAY_PARMS playbeepSound;
 MCI_OPEN_PARMS openbeepSound_1;
@@ -24,8 +26,11 @@ MCI_OPEN_PARMS opentypingSound;
 MCI_PLAY_PARMS playtypingSound;
 MCI_OPEN_PARMS openinitializationSound;
 MCI_PLAY_PARMS playinitializationSound;
+MCI_OPEN_PARMS openrobotSound;
+MCI_PLAY_PARMS playrobotSound;
+MCI_OPEN_PARMS opentextSound;
+MCI_PLAY_PARMS playtextSound;
 
-MCI_GENERIC_PARMS stopBgm_2;
 
 //콘솔창의 크기와 제목을 정하는 함수
 void SetConsoleView()  
@@ -34,6 +39,13 @@ void SetConsoleView()
 	system("title 퍼즐");
 }
 
+void gotoxy(int x, int y)
+{
+	COORD Pos;
+	Pos.X = x;
+	Pos.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), Pos);
+}
 
 //콘솔창 출력색상을 나타내는 함수
 void ColorSet(int backgroundcolor, int textcolor) 
@@ -42,18 +54,13 @@ void ColorSet(int backgroundcolor, int textcolor)
 	SetConsoleTextAttribute(handle, (backgroundcolor << 4) + textcolor);
 }  
 
+
+
+
 //대사나 정보를 원하는 타이밍에 넘길수 있도록 하는 함수 
-int getkey()
-{
-	if (_kbhit() != 0)
-	{
-		return _getch();
-	}
-	return 0;
-}
 void pressanykey(void) {
-	getkey();
-	while (getkey() == 0) {
+	FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE)); //이미 입력된 버퍼지우기
+	while (_getch() == 0) {
 		Sleep(1);
 	}
 }
@@ -97,25 +104,56 @@ char picture_puzzle_2[9][18] = {
 };
 
 
-
 // 사운드 관련 코드 
 int dwID;
-#define	BGM_1 "OneShot OST - Niko And The World Machine.mp3"
-void playingBgm_1(void) {
+#define	BGM_1 "'CGI Snake' by Chris Zabriskie.mp3"
+void playingBgm_1(bool on_off) {
 	openBgm_1.lpstrElementName = BGM_1;
 	openBgm_1.lpstrDeviceType = "mpegvideo";
-	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_1);
-	dwID = openBgm_1.wDeviceID;
-	mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm_1); 
+
+	if (on_off == true) {
+		mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_1);
+		dwID = openBgm_1.wDeviceID;
+		mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm_1);
+	}
+	if (on_off == false) {
+		dwID = openBgm_1.wDeviceID;
+		mciSendCommand(dwID, MCI_STOP, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_1);
+	}
 
 }
 #define	BGM_2 "The Basics of the Case - Ace Attorney 6_ Spirit Of Justice OST .mp3"
-void playingBgm_2(void) {
-	openBgm_2.lpstrElementName = BGM_2;
-	openBgm_2.lpstrDeviceType = "mpegvideo";
-	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_2);
-	dwID = openBgm_2.wDeviceID;
-	mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm_2);
+void playingBgm_2(bool on_off) {
+	if (on_off == true) {
+		openBgm_2.lpstrElementName = BGM_2;
+		openBgm_2.lpstrDeviceType = "mpegvideo";
+		mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_2);
+		dwID = openBgm_2.wDeviceID;
+		mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm_2);
+	}
+	if (on_off == false) {
+		openBgm_2.lpstrElementName = BGM_2;
+		openBgm_2.lpstrDeviceType = "mpegvideo";
+		dwID = openBgm_2.wDeviceID;
+		mciSendCommand(dwID, MCI_STOP, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_2);
+	}
+
+}
+#define	BGM_3 "Portal 2 OST - Overgrowth.mp3"
+void playingBgm_3(bool on_off) {
+	if (on_off == true) {
+		openBgm_3.lpstrElementName = BGM_3;
+		openBgm_3.lpstrDeviceType = "mpegvideo";
+		mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_3);
+		dwID = openBgm_3.wDeviceID;
+		mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, (DWORD)(LPVOID)&openBgm_3);
+	}
+	if (on_off == false) {
+		openBgm_3.lpstrElementName = BGM_1;
+		openBgm_3.lpstrDeviceType = "mpegvideo";
+		dwID = openBgm_3.wDeviceID;
+		mciSendCommand(dwID, MCI_STOP, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openBgm_3);
+	}
 
 }
 #define beep "blipmale.wav"
@@ -128,7 +166,7 @@ void beep_male(int time) {
 	Sleep(time); //실행시간 대사의 속도를 조절하기 위함
 	mciSendCommand(dwID, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)NULL); //음원 재생 위치를 처음으로 초기화
 }
-#define beep_1 "blipfemale.wav"
+#define beep_1 "pc_messagebox.wav"
 void beep_female(int time) {
 	openbeepSound_1.lpstrElementName = beep_1; //파일 오픈
 	openbeepSound_1.lpstrDeviceType = "mpegvideo"; //mp3 형식
@@ -168,9 +206,30 @@ void initialization(void) {
 	Sleep(1000);
 	mciSendCommand(dwID, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)NULL); //음원 재생 위치를 처음으로 초기화
 }
-// 사운드 관련 코드 
+#define text_robot "text_robot.wav"
+void robot_sound(void) {
+	openrobotSound.lpstrElementName = text_robot; //파일 오픈
+	openrobotSound.lpstrDeviceType = "mpegvideo"; //mp3 형식
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&openrobotSound);
+	dwID = openrobotSound.wDeviceID;
+	mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&openrobotSound); //음악을 한 번 재생
+	Sleep(80);
+	mciSendCommand(dwID, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)NULL); //음원 재생 위치를 처음으로 초기화
+}
+#define text "text.wav"
+void text_sound(int time) {
+	opentextSound.lpstrElementName =text; //파일 오픈
+	opentextSound.lpstrDeviceType = "mpegvideo"; //mp3 형식
+	mciSendCommand(0, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE, (DWORD)(LPVOID)&opentextSound);
+	dwID = opentextSound.wDeviceID;
+	mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, (DWORD)(LPVOID)&opentextSound); //음악을 한 번 재생
+	Sleep(time); //실행시간 대사의 속도를 조절하기 위함
+	mciSendCommand(dwID, MCI_SEEK, MCI_SEEK_TO_START, (DWORD)(LPVOID)NULL); //음원 재생 위치를 처음으로 초기화
+}
 
-// 버튼 퍼즐 관련 코드 {
+// 
+
+// 버튼 퍼즐 관련 코드 
 void button_puzzle_first_title(void) {
 	printf("                 ");
 	ColorSet(2, 0);
@@ -499,22 +558,178 @@ void button_puzzle(void) {
 	}
 	viewbutton();
 }
-// 버튼 퍼즐 관련 코드  
+// 
 
 
 void Script_func_n(void) {
-	char Script_n[] = "정답입니다. 다음 테스트를 시작합니다. (아무키나 눌러 진행)";
+	char Script_n[] = "정답입니다. 다음 테스트를 시작합니다.";
 	printf("\n\n");
 	for (int i = 0; i < 38; i++) {
 		if (i == 12) {
 			Sleep(200);
 		}
 		printf("%c", Script_n[i]);
-		beep_male(80);
+		robot_sound();
 	}
 	pressanykey();
 	system("cls");
+	
 }
+void Script_func_1(void) {
+	gotoxy(30, 20);
+	char Script_1[] = "(........)";
+	printf("\n\n");
+	for (int i = 0; i <sizeof(Script_1); i++) {
+		if (i == 8) {
+			Sleep(200);
+		}
+		printf("%c", Script_1[i]);
+		if (i % 2 == 0)
+			beep_male(200);
+		else
+			Sleep(200);
+	}
+	Sleep(500);
+	
+	printf("\n[아무키나 입력]");
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_2[] = "(..........여기가 어디지?)";
+	printf("\n\n");
+	for (int i = 0; i < 27; i++) {
+		if (i == 12) {
+			Sleep(300);
+		}
+		printf("%c", Script_2[i]);
+		if ( i <= 11)
+			beep_male(150);
+		else if( i > 11)
+			beep_male(90);
+		else
+			Sleep(150);
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_3[] = "인공지능 강화 센터의 테스트에 “자원” 해주신분들에게 감사의 말씀을 드립니다.";
+	printf("\n\n");
+	for (int i = 0; i < 78; i++) {
+		if (i == 8) {
+			Sleep(200);
+		}
+		if (i == 32) {
+			Sleep(200);
+		}
+		if (i == 38) {
+			Sleep(200);
+		}
+		printf("%c", Script_3[i]);
+		if (i % 2 == 0)
+			robot_sound();
+	}
+	pressanykey();
+	system("cls");
+
+
+	gotoxy(30, 20);
+	char Script_4[] = "잠시 휴식을 취하시는 동안 편안하셨기를 바랍니다.";
+	printf("\n\n");
+	for (int i = 0; i < 49; i++) {
+		if (i == 27) {
+			Sleep(200);
+		}
+		printf("%c", Script_4[i]);
+		if (i % 2 == 0)
+			robot_sound();
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_5[] = "(무슨소리를 하는거지... 머릿속이 뒤죽박죽이다....)";
+	printf("\n\n");
+	for (int i = 0; i < 51; i++) {
+		if (i == 24) {
+			Sleep(200);
+		}
+		printf("%c", Script_5[i]);
+		if (i % 2 == 0)
+			beep_male(80);
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_6[] = "잠시후 테스트가 시작될 예정입니다.";
+	printf("\n\n");
+	for (int i = 0; i < 35; i++) {
+		printf("%c", Script_6[i]);
+		if (i % 2 == 0)
+			robot_sound();
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_7[] = "저기... 저는 왜 여기 있는거죠?";
+	printf("\n\n");
+	for (int i = 0; i < 31; i++) {
+		if (i == 8) {
+			Sleep(200);
+		}
+		printf("%c", Script_7[i]);
+		if (i % 2 == 0)
+			beep_male(80);
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_8[] = "원활한 테스트 환경을 위해 본 인공지능은 피실험자와 상호작용을 최소화 하고 있습니다.";
+	printf("\n\n");
+	for (int i = 0; i < 84; i++) {
+		if (i == 25) {
+			Sleep(200);
+		}
+		printf("%c", Script_8[i]);
+		if (i % 2 == 0)
+			robot_sound();
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_9[] = "(지금 말하고 있는게... 인공지능이라고?)";
+	printf("\n\n");
+	for (int i = 0; i < 40; i++) {
+		if (i == 22) {
+			Sleep(200);
+		}
+		printf("%c", Script_9[i]);
+		if (i % 2 == 0)
+			beep_male(80);
+	}
+	pressanykey();
+	system("cls");
+
+	gotoxy(30, 20);
+	char Script_10[] = "지금부터 테스트를 시작하겠습니다.";
+	printf("\n\n");
+	for (int i = 0; i < 34; i++) {
+		printf("%c", Script_10[i]);
+		if (i % 2 == 0)
+			robot_sound();
+	}
+	pressanykey();
+	system("cls");
+
+	Sleep(1500);
+
+}
+
 
 // 그림 퍼즐 관련 코드
 void picture_puzzle_first_title(void){
@@ -581,10 +796,10 @@ void check_picture_puzzle_answer(void) {
 		printf("\n");
 		for (int i = 0; i < 38; i++) {
 			if (i == 12) {
-				Sleep(150);
+				Sleep(100);
 			}
 			printf("%c", answer_script[i]);
-			typing_sound();
+			robot_sound();
 		}
 	gameclear = true;
 	system("cls");
@@ -596,7 +811,7 @@ void check_picture_puzzle_answer(void) {
 			Sleep(150);
 		}
 		printf("%c", incorrect_script[i]);
-		typing_sound();
+		robot_sound();
 	}
 	Sleep(300);
 	system("cls");
@@ -615,17 +830,31 @@ void picture_puzzle(void) {
 // 그림 퍼즐 관련 코드
 
 
+
+
 int main(void) {
+	system("mode con:cols=85 lines=30");
+	playingBgm_3(true);
+	Script_func_1();
 	SetConsoleView();
-	playingBgm_2(); 
+	playingBgm_3(false);
+	playingBgm_1(true);
 	button_puzzle();
 	Script_func_n();
 	picture_puzzle();
-	printf("미완성");
 
-	Sleep(1000000);
+	printf("미완성");
+	pressanykey();
 
 
 
 	return 0;
+}
+
+// ?????
+void 하나(void)
+{
+#define  three
+	printf("4");
+	bool blue  = false;
 }
